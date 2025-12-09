@@ -1,0 +1,12 @@
+services:
+  bot:
+    image: python:3.8-slim-buster
+    environment:
+      - TOKEN=${TOKEN}
+      - channel_id=${channel_id}
+      - goat_id=${goat_id}
+    working_dir: /bot
+    command: bash -c "pip install -r requirements.txt && python3 bot.py"
+    volumes: 
+      - ./:/bot
+      - ./data:/data

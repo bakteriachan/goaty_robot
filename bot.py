@@ -37,7 +37,7 @@ if os.getenv('goat_id',None) is None:
     exit(1)
 
 goat_id = list(map(int,str(os.getenv('goat_id')).split(' ')))
-
+logging.info(f' goat id: {goat_id}')
 
 main_dir = '/data/'
 if os.getenv('LOCAL',None) is not None:
@@ -161,7 +161,7 @@ def get_resume_posts():
     except OSError:
         raise Exception('Could not open a file')
     else:
-        search = re.findall(b'(https://t\\.me/[a-zA-Z_0-9]+/[0-9]+)\x00([0-9]+)\x01',resume.read(-1))
+        search = re.findall(b'(https://t\\.me/[a-zA-Z_0-9]+/[0-9]+)\x00([^\x01]+)\x01',resume.read(-1))
         resume.close()
     
     res = []
@@ -196,6 +196,8 @@ def build_resume_text(curr_num):
     curr = f'「Rezumen {curr_num}」\n\n• [Resumen {past_resume[1]}]({past_resume[0]})\n\n'
 
     posts = get_resume_posts()
+
+    logging.info(f'posts: {posts}')
 
     for post in posts:
         resume = f'• [{parse_text(post[1])}]({post[0]}) \n\n'
@@ -426,7 +428,7 @@ def remove(update,context):
         raise Exception('Could not open resume file')
     else:
         for i in resume_posts:
-            resume.write(i[0] + b'\x00' + i[1] + b'\x01')
+            resume.write(bytes(i[0], 'utf8') + b'\x00' + bytes(i[1], 'utf8') + b'\x01')
         resume.close()
 
     update.effective_chat.send_message(
@@ -483,7 +485,7 @@ def edit_past_link(update,context):
 def error_handler(update,context):
     CHAT_ID = update.effective_chat.id
     context.bot.send_message(
-        chat_id = goaty_id[0],
+        chat_id = goat_id[0],
         text = str(sys.exc_info())
     )
 
